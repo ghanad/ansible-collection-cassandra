@@ -19,15 +19,18 @@ jobs:
       - name: set up python3
         uses: actions/setup-python@v2
       
-      - name: install test depend
-        run: pip3 install molecule docker
+      - name: install ansible with pip
+        run: pip3 install ansible 
 
       - name: download java tar file
         run: wget https://iweb.dl.sourceforge.net/project/javajdk-8/JDK8/jdk-8u241-linux-x64.tar.gz -P /opt/
 
-      - name: Run Molecule test
-        run: molecule test
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLORE: '1'
-          MOLECULE_DISTRO: ${{ matrix.distro }}
+
+      - name: is it docker
+        run: ls
+      # - name: Run Molecule test
+      #   run: molecule test
+      #   env:
+      #     PY_COLORS: '1'
+      #     ANSIBLE_FORCE_COLORE: '1'
+      #     MOLECULE_DISTRO: ${{ matrix.distro }}
