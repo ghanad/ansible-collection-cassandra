@@ -1,0 +1,60 @@
+---
+- name: find java file on /opt/ local machine
+  ansible.builtin.find:
+    paths: "{{ JAVA_SRC_DIR }}"
+    patterns: 'jdk-*.tar.gz'
+  register: JAVA_FILE_PATH
+  run_once: true
+  delegate_to: localhost
+
+- name: file not found in source or remote direcotry
+  fail:
+    msg: "java file not found in {{ JAVA_SRC_DIR }}"
+  when: 
+  - JAVA_FILE_PATH.matched == 0
+
+- name: create tmp dire on local host
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: java-
+  register: JAVA_TMP_DIR
+  delegate_to: localhost
+  run_once: true
+
+- name: get root directory name from archive file
+  ansible.builtin.unarchive:
+    src: "{{ JAVA_FILE_PATH.files.0.path }}"
+    dest: "{{ JAVA_TMP_DIR.path }}"
+    list_files: yes
+  register: TMP_DIR
+  delegate_to: localhost
+  run_once: true
+
+- name: pars directory name
+  set_fact:
+    DIR_NAME: "{{ TMP_DIR.files.2.split('/')[0] }}"
+
+- name: set fact for java home directory
+  set_fact:
+    JAVA_HOME: '{{ (JAVA_DEST_DIR , DIR_NAME) | path_join }}'
+
+- name: find directory {{DIR_NAME}} on target host
+  ansible.builtin.find:
+    path: "{{ JAVA_DEST_DIR }}"
+    patterns: "{{ DIR_NAME }}"
+    file_type: directory
+  register: TARGET_FILE_EXISTS
+
+- name: unarchive {{ DIR_NAME }} on hosts that directory not exists
+  ansible.builtin.unarchive:
+    src: "{{ JAVA_FILE_PATH.files.0.path }}"
+    dest: "{{ JAVA_DEST_DIR }}"
+  when:
+  - TARGET_FILE_EXISTS.matched == 0
+
+- name: remove tmp directory on local host
+  ansible.builtin.file:
+    path: "{{ JAVA_TMP_DIR.path }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
