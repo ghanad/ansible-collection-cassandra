@@ -1,7 +1,6 @@
 ---
 name: CI
 'on':
-  pull_request:
   push:
     branches:
       - main
@@ -9,11 +8,8 @@ name: CI
 jobs:
   test:
     name: collection test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-16.04, ubuntu-18.04]
-        # python-version: [3.6]
+    runs-on: ubuntu-16.04
+
 
     steps:
       - name: check out
@@ -21,8 +17,6 @@ jobs:
 
       - name: set up python3
         uses: actions/setup-python@v2
-        # with:
-          # python-version: ${{ matrix.python-version }}
 
       - name: install test depend
         run: pip3 install molecule docker
