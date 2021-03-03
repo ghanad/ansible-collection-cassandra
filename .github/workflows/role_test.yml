@@ -27,7 +27,7 @@ jobs:
 
 
       - name: is it docker
-        run: ls
+        run: ls /root/; ls /home/ ; ls /opt/ ; cat /etc/issue
       # - name: Run Molecule test
       #   run: molecule test
       #   env:
